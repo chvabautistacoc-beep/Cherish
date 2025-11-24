@@ -1,0 +1,199 @@
+#====================== Library Book Borrowing System ================
+admin_username = "admin"
+admin_password = "admin123"
+students = {}
+borrowed_books = {}
+current_day = 1
+
+#========== Admin Function ============
+def admin_login():
+    print("Admin Login")
+    username = input("Enter username: ")
+    password = input("Enter password: ")
+
+    if username == admin_username and password == admin_password:
+        print("Admin Login Successful.")
+        admin_menu()
+    else:
+        print("Invalid admin credentials.")
+
+#========== Admin Menu ============
+def admin_menu():
+    global current_day
+    while True:
+        print("\nAdmin Menu:")
+        print("1. Log a borrowed book")
+        print("2. View borrowed books")
+        print("3. Mark a book as returned")
+        print("4. Delete a borrowed book")
+        print("5. View student accounts")
+        print("6. Advance current day")
+        print("7. Logout")
+
+        choice = input("Enter choice: ")
+
+        if choice == "1":
+            username = input("Enter student's username: ")
+            book = input("Enter the name of the borrowed book: ")
+            due_day = current_day + 7
+            borrowed_books[book] = {
+                "username": username,
+                "borrow_day": current_day,
+                "due_day": due_day,
+                "returned": False
+            }
+            print(f"Book '{book}' logged successfully for {username}. Due on day {due_day}.")
+
+        elif choice == "2":
+            if not borrowed_books:
+                print("No borrowed books yet.")
+            else:
+                print("Borrowed Books:")
+                for book, info in borrowed_books.items():
+                    status = "Returned" if info["returned"] else "Not Returned"
+                    print(f"- {book} | Borrower: {info['username']} | Due: Day {info['due_day']} | Status: {status}")
+                    if not info["returned"] and current_day > info["due_day"]:
+                        print(f"  *Overdue! (Today: {current_day})*")
+
+        elif choice == "3":
+            if not borrowed_books:
+                print("No borrowed books to mark as returned.")
+            else:
+                book_to_return = input("Enter the name of the book to mark as returned: ")
+                if book_to_return in borrowed_books and not borrowed_books[book_to_return]["returned"]:
+                    borrowed_books[book_to_return]["returned"] = True
+                    print(f"Book '{book_to_return}' marked as returned.")
+                else:
+                    print(f"Book '{book_to_return}' not found or already returned.")
+
+        elif choice == "4":
+            if not borrowed_books:
+                print("No borrowed books to delete.")
+            else:
+                book_to_delete = input("Enter the name of the book to delete: ")
+                if book_to_delete in borrowed_books:
+                    del borrowed_books[book_to_delete]
+                    print(f"Book '{book_to_delete}' deleted successfully.")
+                else:
+                    print(f"Book '{book_to_delete}' not found.")
+
+        elif choice == "5":
+            if not students:
+                print("No student accounts yet.")
+            else:
+                print("Student Accounts:")
+                for user, pwd in students.items():
+                    print(f"- {user}: {pwd}")
+
+        elif choice == "6":
+            current_day += 1
+            print(f"Advanced current day. It is now day {current_day}.")
+
+        elif choice == "7":
+            print("Logging out...")
+            break
+
+        else:
+            print("Invalid choice. Please try again.")
+
+#========== Student Account Functions ============
+def create_student_account(username):
+    if username in students:
+        print("Username already exists! Try logging in.")
+        return
+    password = input("Create a password for your student account: ")
+    students[username] = password
+    print(f"Student account '{username}' created successfully!")
+
+#========== Student Login ============
+def student_login():
+    print("Student Login")
+    username = input("Enter username: ")
+
+    if username in students:
+        password = input("Enter password: ")
+        if students[username] == password:
+            print("Student login successful!")
+            student_menu(username)
+        else:
+            print("Invalid password.")
+    else:
+        print("Student account does not exist. Would you like to create a new account? (yes/no)")
+        if input().lower() == "yes":
+            create_student_account(username)
+
+#========== Student Menu ============
+def student_menu(username):
+    global current_day
+    while True:
+        print(f"\nStudent Menu ({username}):")
+        print("1. Borrow a book")
+        print("2. View my borrowed books")
+        print("3. View due dates")
+        print("4. Logout")
+
+        choice = input("Enter choice: ")
+
+        if choice == "1":
+            book = input("Enter the name of the borrowed book: ")
+            due_day = current_day + 7
+            borrowed_books[book] = {
+                "username": username,
+                "borrow_day": current_day,
+                "due_day": due_day,
+                "returned": False
+            }
+            print(f"Book '{book}' borrowed successfully! Due on day {due_day}.")
+
+        elif choice == "2":
+            found = False
+            for book, info in borrowed_books.items():
+                if info["username"] == username:
+                    found = True
+                    status = "Returned" if info["returned"] else "Not Returned"
+                    print(f"- {book} | Due: Day {info['due_day']} | Status: {status}")
+                    if not info["returned"] and current_day > info["due_day"]:
+                        print(f"  ==Overdue! (Today: {current_day})==")
+            if not found:
+                print("You have no borrowed books.")
+
+        elif choice == "3":
+            has_books = False
+            for book, info in borrowed_books.items():
+                if info["username"] == username:
+                    has_books = True
+                    print(f"- {book} | Due: Day {info['due_day']}")
+                    if not info["returned"] and current_day > info["due_day"]:
+                        print(f"  ==Overdue! (Today: {current_day})==")
+            if not has_books:
+                print("You have no borrowed books.")
+
+        elif choice == "4":
+            print("Logging out...")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+#========== Main Menu ============
+def main():
+    while True:
+        print("\nWelcome to the Library System!")
+        print(f"Current Day: {current_day}")
+        print("1. Admin Login")
+        print("2. Student Login")
+        print("3. Exit")
+        choice = input("Enter a choice: ")
+
+        if choice == "1":
+            admin_login()
+        elif choice == "2":
+            student_login()
+        elif choice == "3":
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid choice")
+
+main()
+
+# By Group 2 🙂
